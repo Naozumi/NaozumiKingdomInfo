@@ -9,6 +9,7 @@ using TaleWorlds.MountAndBlade;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
+using TaleWorlds.CampaignSystem.Actions;
 
 namespace zNaozumiKingdomInfo
 {
@@ -23,49 +24,149 @@ namespace zNaozumiKingdomInfo
                 {
                     if (InputKey.End.IsPressed())
                     {
-                        string output = "Kingdom Members{newline}";
-
-                        foreach (Kingdom kingdom in Kingdom.All)
-                        {
-                            if (kingdom != null)
+                        List<InquiryElement> inquiryElements = new List<InquiryElement>
                             {
-                                Double aliveNobleCount = 0;
-                                Double aliveMinorFactionHeroCount = 0;
-                                Double aliveChildCount = 0;
-
-                                foreach (Clan clan in kingdom.Clans)
-                                {
-                                    foreach (Hero hero in clan.Heroes)
-                                    {
-                                        if (hero.IsAlive)
-                                        {
-                                            if (!hero.IsChild)
-                                            {
-                                                if (hero.IsNoble)
-                                                {
-                                                    aliveNobleCount++;
-                                                }
-                                                else if (hero.IsMinorFactionHero)
-                                                {
-                                                    aliveMinorFactionHeroCount++;
-                                                }
-                                            }
-                                            else if (hero.IsChild && (hero.IsNoble || hero.IsMinorFactionHero))
-                                            {
-                                                aliveChildCount++;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                output += "{newline}" + kingdom.Name.ToString() + " - Nobles: " + aliveNobleCount.ToString() + " - Minor Heros: " + aliveMinorFactionHeroCount.ToString() + " - Kids: " + aliveChildCount.ToString();
-                            }
-                        }
-
-                        InformationManager.ShowInquiry(new InquiryData("Kingdom Info", output, true, false, "Close", "Cancel", null, null, ""), false);
+                                new InquiryElement("wars", "Wars", null, true, "Shows the current wars between each of the Kingdoms."),
+                                new InquiryElement("kingdomheros", "Kingdom Heros", null, true, "Shows the number of heros in each Kingdom."),
+                                new InquiryElement("herodeaths", "Kingdom Deaths", null, true, "Shows the number of heros that have died in each Kingdom.")
+                            };
+                        InformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData("Kingdom Info", "", inquiryElements, false, true, "Show", "Close", new Action<List<InquiryElement>>(this.OptionSelected), null, ""), false);
                     }
                 }
             }
+        }
+
+        private void OptionSelected(List<InquiryElement> selections)
+        {
+            InquiryElement selection = selections.FirstOrDefault<InquiryElement>();
+            if (selection != null)
+            {
+                string a = selection.Identifier as string;
+                if (a == "wars")
+                {
+                    ShowWars();
+                }
+                else if (a == "kingdomheros")
+                {
+                    ShowKingdomHeros();
+                }else if (a == "herodeaths")
+                {
+                    ShowKingdomHeroDeaths();
+                }
+            }
+        }
+
+        private void ShowWars()
+        {
+            string output = "";
+            bool first = true;
+
+            foreach (Kingdom kingdom1 in Kingdom.All)
+            {
+                if (!first) output += "\n";
+                first = false;
+                if (kingdom1 != null)
+                {
+                    output += kingdom1.Name.ToString() + ": ";
+                    bool peace = true;
+                    foreach (Kingdom kingdom2 in Kingdom.All)
+                    {
+                        if (kingdom2 != null)
+                        {
+                            if (kingdom1.IsAtWarWith(kingdom2))
+                            {
+                                if (!peace) output += ", ";
+                                peace = false;
+                                output += kingdom2.Name.ToString();
+                            }
+                        }
+                    }
+                    if (peace) output += "At peace";
+                }
+            }
+
+            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Wars", output, true, false, "Close", "Cancel", null, null, ""), false);
+        }
+
+        private void ShowKingdomHeros()
+        {
+            string output = "";
+            bool first = true;
+
+            foreach (Kingdom kingdom in Kingdom.All)
+            {
+                if (!first) output += "\n";
+                first = false;
+                if (kingdom != null)
+                {
+                    Double aliveNobleCount = 0;
+                    Double aliveMinorFactionHeroCount = 0;
+                    Double aliveChildCount = 0;
+
+                    foreach (Clan clan in kingdom.Clans)
+                    {
+                        foreach (Hero hero in clan.Heroes)
+                        {
+                            if (hero.IsAlive)
+                            {
+                                if (!hero.IsChild)
+                                {
+                                    if (hero.IsNoble)
+                                    {
+                                        aliveNobleCount++;
+                                    }
+                                    else if (hero.IsMinorFactionHero)
+                                    {
+                                        aliveMinorFactionHeroCount++;
+                                    }
+                                }
+                                else if (hero.IsChild && (hero.IsNoble || hero.IsMinorFactionHero))
+                                {
+                                    aliveChildCount++;
+                                }
+                            }
+                        }
+                    }
+
+                    output += kingdom.Name.ToString() + " - Nobles: " + aliveNobleCount.ToString() + " - Minor Heros: " + aliveMinorFactionHeroCount.ToString() + " - Kids: " + aliveChildCount.ToString();
+                }
+            }
+
+            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Kingdom Heros", output, true, false, "Close", "Cancel", null, null, ""), false);
+        }
+
+        private void ShowKingdomHeroDeaths()
+        {
+            string output = "";
+            bool first = true;
+
+            foreach (Kingdom kingdom in Kingdom.All)
+            {
+                if (!first) output += "\n";
+                first = false;
+                if (kingdom != null)
+                {
+                    Double aliveNobleCount = 0;
+                    Double aliveMinorFactionHeroCount = 0;
+                    Double aliveChildCount = 0;
+                    Double dead = 0;
+
+                    foreach (Clan clan in kingdom.Clans)
+                    {
+                        foreach (Hero hero in clan.Heroes)
+                        {
+                            if ((hero.IsNoble || hero.IsMinorFactionHero) && hero.IsDead)
+                            {
+                                dead++;
+                            }
+                        }
+                    }
+
+                    output += kingdom.Name.ToString() + ": " + dead.ToString();
+                }
+            }
+
+            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Dead Heros", output, true, false, "Close", "Cancel", null, null, ""), false);
         }
     }
 }
