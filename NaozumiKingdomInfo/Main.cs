@@ -30,7 +30,7 @@ namespace zNaozumiKingdomInfo
                                 new InquiryElement("kingdomheros", "Kingdom Heros", null, true, "Shows the number of heros in each Kingdom."),
                                 new InquiryElement("herodeaths", "Kingdom Deaths", null, true, "Shows the number of heros that have died in each Kingdom.")
                             };
-                        InformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData("Kingdom Info", "", inquiryElements, false, true, "Show", "Close", new Action<List<InquiryElement>>(this.OptionSelected), null, ""), false);
+                        InformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData("Kingdom Info", "", inquiryElements, true, true, "Show", "Close", new Action<List<InquiryElement>>(this.OptionSelected), null, ""), true);
                     }
                 }
             }
@@ -167,6 +167,11 @@ namespace zNaozumiKingdomInfo
             }
 
             InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Dead Heros", output, true, false, "Close", "Cancel", null, null, ""), false);
+        }
+
+        private void TrackSettlement(Settlement settlement)
+        {
+            Campaign.Current.VisualTrackerManager.RegisterObject(settlement);
         }
     }
 }
