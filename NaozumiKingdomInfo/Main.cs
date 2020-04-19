@@ -15,6 +15,15 @@ namespace zNaozumiKingdomInfo
 {
     class Main : MBSubModuleBase
     {
+        private InputKey MenuKey = InputKey.End;
+
+        protected override void OnSubModuleLoad()
+        {
+            base.OnSubModuleLoad();
+            UserSettings userSettings = new UserSettings();
+            MenuKey = userSettings.MenuKey;
+        }
+
         protected override void OnApplicationTick(float dt)
         {
             base.OnApplicationTick(dt);
@@ -22,13 +31,13 @@ namespace zNaozumiKingdomInfo
             {
                 if (Campaign.Current.GameStarted)
                 {
-                    if (InputKey.End.IsPressed())
+                    if (MenuKey.IsPressed())
                     {
                         List<InquiryElement> inquiryElements = new List<InquiryElement>
                             {
                                 new InquiryElement("wars", "Wars", null, true, "Shows the current wars between each of the Kingdoms."),
-                                new InquiryElement("kingdomheros", "Kingdom Heros", null, true, "Shows the number of heros in each Kingdom."),
-                                new InquiryElement("herodeaths", "Kingdom Deaths", null, true, "Shows the number of heros that have died in each Kingdom.")
+                                new InquiryElement("kingdomheroes", "Kingdom Heroes", null, true, "Shows the number of heroes in each Kingdom."),
+                                new InquiryElement("herodeaths", "Kingdom Deaths", null, true, "Shows the number of heroes that have died in each Kingdom.")
                             };
                         InformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData("Kingdom Info", "", inquiryElements, true, true, "Show", "Close", new Action<List<InquiryElement>>(this.OptionSelected), null, ""), true);
                     }
@@ -46,9 +55,9 @@ namespace zNaozumiKingdomInfo
                 {
                     ShowWars();
                 }
-                else if (a == "kingdomheros")
+                else if (a == "kingdomheroes")
                 {
-                    ShowKingdomHeros();
+                    ShowKingdomHeroes();
                 }else if (a == "herodeaths")
                 {
                     ShowKingdomHeroDeaths();
@@ -88,7 +97,7 @@ namespace zNaozumiKingdomInfo
             InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Wars", output, true, false, "Close", "Cancel", null, null, ""), false);
         }
 
-        private void ShowKingdomHeros()
+        private void ShowKingdomHeroes()
         {
             string output = "";
             bool first = true;
@@ -128,11 +137,11 @@ namespace zNaozumiKingdomInfo
                         }
                     }
 
-                    output += kingdom.Name.ToString() + " - Nobles: " + aliveNobleCount.ToString() + " - Minor Heros: " + aliveMinorFactionHeroCount.ToString() + " - Kids: " + aliveChildCount.ToString();
+                    output += kingdom.Name.ToString() + " - Nobles: " + aliveNobleCount.ToString() + " - Minor Heroes: " + aliveMinorFactionHeroCount.ToString() + " - Kids: " + aliveChildCount.ToString();
                 }
             }
 
-            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Kingdom Heros", output, true, false, "Close", "Cancel", null, null, ""), false);
+            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Kingdom Heroes", output, true, false, "Close", "Cancel", null, null, ""), false);
         }
 
         private void ShowKingdomHeroDeaths()
@@ -166,7 +175,7 @@ namespace zNaozumiKingdomInfo
                 }
             }
 
-            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Dead Heros", output, true, false, "Close", "Cancel", null, null, ""), false);
+            InformationManager.ShowInquiry(new InquiryData("Kingdom Info - Dead Heroes", output, true, false, "Close", "Cancel", null, null, ""), false);
         }
 
         private void TrackSettlement(Settlement settlement)
